@@ -36,6 +36,14 @@ POINT_CLOUD_REGISTER_POINT_STRUCT (mmWaveCloudType,
                                     (float, z, z)
                                     (float, intensity, intensity)
                                     (float, velocity, velocity))
+
+POINT_CLOUD_REGISTER_POINT_STRUCT (coloradarCloudType,
+                                    (float, x, x)
+                                    (float, y, y)
+                                    (float, z, z)
+                                    (float, intensity, intensity)
+                                    (float, range, range)
+                                    (float, doppler, doppler))
 // clang-format on
 
 bool reve::pcl2msgToPcl(const sensor_msgs::PointCloud2& pcl_msg, pcl::PointCloud<RadarPointCloudType>& scan)
@@ -85,6 +93,31 @@ bool reve::pcl2msgToPcl(const sensor_msgs::PointCloud2& pcl_msg, pcl::PointCloud
       p_.snr_db        = p.intensity;
       p_.v_doppler_mps = p.velocity;
       p_.range         = p.getVector3fMap().norm();
+      p_.noise_db      = -1.;
+      scan.push_back(p_);
+    }
+    return true;
+  }
+  else if (fields.find("x") != fields.end() && fields.find("y") != fields.end() && fields.find("z") != fields.end() &&
+           fields.find("intensity") != fields.end() && fields.find("range") != fields.end() && fields.find("doppler") != fields.end())
+  {
+    ROS_INFO_ONCE("[pcl2msgToPcl]: Detected coloradar_rospkg pcl format!");
+
+    pcl::PointCloud<coloradarCloudType> scan_mmwave;
+    pcl::PCLPointCloud2 pcl_pc2;
+    pcl_conversions::toPCL(pcl_msg, pcl_pc2);
+    pcl::fromPCLPointCloud2(pcl_pc2, scan_mmwave);
+
+    scan.clear();
+    for (const auto& p : scan_mmwave)
+    {
+      RadarPointCloudType p_;
+      p_.x             = -p.y;
+      p_.y             = p.x;
+      p_.z             = p.z;
+      p_.snr_db        = p.intensity;
+      p_.v_doppler_mps = p.doppler;
+      p_.range         = p.range;
       p_.noise_db      = -1.;
       scan.push_back(p_);
     }

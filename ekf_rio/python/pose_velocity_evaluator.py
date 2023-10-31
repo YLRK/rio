@@ -172,8 +172,11 @@ if __name__ == "__main__":
     topic_pose = rospy.get_param('~topic_pose', "/rio_calib_filter_live/pose")
     topic_twist = rospy.get_param('~topic_twist', "/rio_calib_filter_live/twist")
 
-    topic_pose_gt = rospy.get_param('~topic_pose_gt', "/ground_truth/pose")
-    topic_twist_gt = rospy.get_param('~topic_twist_gt', "/ground_truth/twist")
+    # topic_pose_gt = rospy.get_param('~topic_pose_gt', "/ground_truth/pose")
+    # topic_twist_gt = rospy.get_param('~topic_twist_gt', "/ground_truth/twist")
+
+    topic_pose_gt = rospy.get_param('~topic_pose_gt', "/lidar_ground_truth/pose")
+    topic_twist_gt = rospy.get_param('~topic_twist_gt', "/lidar_ground_truth/twist")
 
     filter_name = rospy.get_param('~filter_name', "ekf-rio")
     do_plot = rospy.get_param('~do_plot', True)

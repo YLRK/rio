@@ -35,7 +35,8 @@ public:
    */
   Real calculate_rel_neg_height(const sensor_msgs::FluidPressure& pressure_msg)
   {
-    return (R * T_0) / (g_0 * M) * std::log(pressure_msg.fluid_pressure / P_0);
+    // return (R * T_0) / (g_0 * M) * std::log(pressure_msg.fluid_pressure / P_0);
+    return 0;
   }
 
 private:

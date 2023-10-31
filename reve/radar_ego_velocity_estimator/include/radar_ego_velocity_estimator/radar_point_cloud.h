@@ -50,6 +50,23 @@ struct mmWaveCloudType
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 
+struct coloradarCloudType
+{
+  PCL_ADD_POINT4D;
+  union
+  {
+    struct
+    {
+      float intensity;
+      float range;
+      float doppler;
+    };
+    float data_c[5];
+  };
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+};
+
+
 bool pcl2msgToPcl(const sensor_msgs::PointCloud2& pcl_msg, pcl::PointCloud<RadarPointCloudType>& scan);
 
 bool pclToPcl2msg(pcl::PointCloud<RadarPointCloudType> scan, sensor_msgs::PointCloud2& pcl_msg);
