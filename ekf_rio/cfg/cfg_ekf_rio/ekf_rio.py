@@ -29,6 +29,8 @@ def configure(gen):
     rosbag_mode.add("topic_ground_truth_pose", str_t, 0, "Ground truth pose topic which will be republished", "/ground_truth/pose")
     rosbag_mode.add("topic_ground_truth_twist", str_t, 0, "Ground truth twist topic which will be republished", "/ground_truth/twist")
     rosbag_mode.add("topic_ground_truth_twist_body", str_t, 0, "Ground truth twist of body frame topic which will be republished", "/ground_truth/twist_body")
+    rosbag_mode.add("use_coloradar_dataset", bool_t, 0, "use coloradar", False)
+
 
     # kf update
     kf_update = gen.add_group("KF Update")

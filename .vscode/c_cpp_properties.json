@@ -1,0 +1,27 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${default}",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "/share/1.catkin_ws/catkin_rio/devel/include/**",
+        "/opt/ros/noetic/include/**",
+        "/share/1.catkin_ws/catkin_rio/src/radrio/ekf_rio/include/**",
+        "/share/1.catkin_ws/catkin_rio/src/radrio/ekf_yrio/include/**",
+        "/share/1.catkin_ws/catkin_rio/src/radrio/gnss_x_rio/include/**",
+        "/share/1.catkin_ws/catkin_rio/src/radrio/reve/radar_ego_velocity_estimator/include/**",
+        "/share/1.catkin_ws/catkin_rio/src/radrio/rio_utils/include/**",
+        "/share/1.catkin_ws/catkin_rio/src/radrio/x_rio/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS",
+      "intelliSenseMode": "gcc-x64",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "gnu11",
+      "cppStandard": "c++14"
+    }
+  ],
+  "version": 4
+}

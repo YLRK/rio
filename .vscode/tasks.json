@@ -1,0 +1,21 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "catkin",
+			"args": [
+				"build",
+				"--workspace",
+				"/share/1.catkin_ws/catkin_rio",
+				"ekf_rio",
+				"--cmake-args",
+				"-DCMAKE_BUILD_TYPE=Debug"
+			],
+			"problemMatcher": [
+				"$catkin-gcc"
+			],
+			"group": "build",
+			"label": "catkin: build"
+		}
+	]
+}

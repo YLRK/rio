@@ -1,12 +1,13 @@
 ## Topics
-topic_baro_altimeter: "/sensor_platform/baro"
+# topic_baro_altimeter: "/sensor_platform/baro"
 # topic_imu: "/sensor_platform/imu"
 # topic_radar_scan: "/ti_mmwave/radar_scan_pcl"
 # topic_radar_trigger: "/sensor_platform/radar_right/trigger"
 
 topic_imu: "/gx5/imu/data"
 topic_radar_scan: "/mmWaveDataHdl/RScan"
-topic_radar_trigger: "/mmWaveDataHdl/RScan/header"
+# topic_radar_trigger: "/mmWaveDataHdl/RScan/header"
+topic_radar_trigger: "/dca_node/heatmap/header"
 
 
 
@@ -35,5 +36,5 @@ q_b_r_w: 0.707388269167
 # length of each radar frame (="exposure time" of radar scan) in milliseconds
 radar_frame_ms: 18.5
 
-# nominal radar rate
+# nominal radar rate hz 0.1s
 radar_rate: 10

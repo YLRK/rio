@@ -41,12 +41,12 @@ EkfRioRos::EkfRioRos(ros::NodeHandle& nh) : initialized_{false}
 
   // subscribers
   sub_imu_  = nh.subscribe<sensor_msgs::Imu>(config_.topic_imu, 2, boost::bind(&EkfRioRos::callbackIMU, this, _1));
-  sub_baro_ = nh.subscribe<sensor_msgs::FluidPressure>(
-      config_.topic_baro_altimeter, 2, boost::bind(&EkfRioRos::callbackBaroAltimter, this, _1));
+  // sub_baro_ = nh.subscribe<sensor_msgs::FluidPressure>(
+  //     config_.topic_baro_altimeter, 2, boost::bind(&EkfRioRos::callbackBaroAltimter, this, _1));
   sub_radar_ = nh.subscribe<sensor_msgs::PointCloud2>(
       config_.topic_radar_scan, 2, boost::bind(&EkfRioRos::callbackRadarScan, this, _1));
   sub_radar_trigger_ = nh.subscribe<std_msgs::Header>(
-      config_.topic_radar_trigger, 2, boost::bind(&EkfRioRos::callbackRadarTrigger, this, _1));
+      config_.topic_radar_trigger, 2, boost::bind(&EkfRioRos::callbackRadarTrigger, this, _1)); // bug here
 
   // publishers
   pub_cov_               = nh.advertise<ekf_rio::EkfRioCovariance>("covariance", 5);
@@ -75,19 +75,19 @@ bool EkfRioRos::initImu(const ImuDataStamped& imu_data)
   if (T_init_so_far > config_.T_init)
   {
     Real baro_h_0 = 0.0;
-    if (config_.altimeter_update)
-    {
-      if (baro_init_vec_.size() > 0)
-      {
-        baro_h_0 = std::accumulate(baro_init_vec_.begin(), baro_init_vec_.end(), 0.0) / baro_init_vec_.size();
-        ROS_INFO_STREAM(kStreamingPrefix << "Initialized baro h_0: " << baro_h_0);
-        baro_initialized_ = true;
-      }
-      else
-      {
-        ROS_ERROR_STREAM(kStreamingPrefix << "Unable to init baro --> no measurements received!");
-      }
-    }
+    // if (config_.altimeter_update)
+    // {
+    //   if (baro_init_vec_.size() > 0)
+    //   {
+    //     baro_h_0 = std::accumulate(baro_init_vec_.begin(), baro_init_vec_.end(), 0.0) / baro_init_vec_.size();
+    //     ROS_INFO_STREAM(kStreamingPrefix << "Initialized baro h_0: " << baro_h_0);
+    //     baro_initialized_ = true;
+    //   }
+    //   else
+    //   {
+    //     ROS_ERROR_STREAM(kStreamingPrefix << "Unable to init baro --> no measurements received!");
+    //   }
+    // }
 
     initialized_            = ekf_rio_filter_.init(imu_init_, baro_h_0);
     filter_start_stamp_     = ekf_rio_filter_.getTimestamp();
@@ -125,7 +125,7 @@ void EkfRioRos::runFromRosbag(const std::string& rosbag_path,
   source_bag.open(rosbag_path, rosbag::bagmode::Read);
   std::vector<std::string> topics;
   topics.push_back(config_.topic_imu);
-  topics.push_back(config_.topic_baro_altimeter);
+  // topics.push_back(config_.topic_baro_altimeter);
   topics.push_back(config_.topic_radar_scan);
   topics.push_back(config_.topic_radar_trigger);
 
@@ -152,6 +152,7 @@ void EkfRioRos::runFromRosbag(const std::string& rosbag_path,
       break;
 
     const auto topic = m.getTopic();
+    
     if (topic == config_.topic_imu)
     {
       const auto imu_msg_bag = m.instantiate<sensor_msgs::Imu>();
@@ -160,18 +161,26 @@ void EkfRioRos::runFromRosbag(const std::string& rosbag_path,
         callbackIMU(imu_msg_bag);
       }
     }
-    else if (topic == config_.topic_baro_altimeter)
-    {
-      const auto baro_msg = m.instantiate<sensor_msgs::FluidPressure>();
-      if (baro_msg != NULL)
-        callbackBaroAltimter(baro_msg);
-    }
+    // else if (topic == config_.topic_baro_altimeter)
+    // {
+    //   const auto baro_msg = m.instantiate<sensor_msgs::FluidPressure>();
+    //   if (baro_msg != NULL)
+    //     callbackBaroAltimter(baro_msg);
+    // }
     else if (topic == config_.topic_radar_scan)
     {
       const auto radar_scan = m.instantiate<sensor_msgs::PointCloud2>();
       if (radar_scan != NULL)
         callbackRadarScan(radar_scan);
 
+      if (config_.use_coloradar_dataset)
+      {
+        std_msgs::HeaderConstPtr radar_trigger_msg = boost::make_shared<std_msgs::Header>(radar_scan->header);
+        double timeOffset = 0.02; // 0.02秒
+        const_cast<ros::Time&>(radar_trigger_msg->stamp) = radar_trigger_msg->stamp - ros::Duration(timeOffset);
+        if (radar_trigger_msg != NULL)
+          callbackRadarTrigger(radar_trigger_msg);
+      }
       if (sleep_ms > 0)
         ros::Duration(sleep_ms / 1.0e3).sleep();
     }
@@ -181,27 +190,27 @@ void EkfRioRos::runFromRosbag(const std::string& rosbag_path,
       if (radar_trigger_msg != NULL)
         callbackRadarTrigger(radar_trigger_msg);
     }
-    else if (config_.republish_ground_truth)
-    {
-      if (topic == config_.topic_ground_truth_pose)
-      {
-        const auto msg = m.instantiate<geometry_msgs::PoseStamped>();
-        if (msg)
-          pub_ground_truth_pose_.publish(msg);
-      }
-      else if (topic == config_.topic_ground_truth_twist)
-      {
-        const auto msg = m.instantiate<geometry_msgs::TwistStamped>();
-        if (msg)
-          pub_ground_truth_twist_.publish(msg);
-      }
-      else if (topic == config_.topic_ground_truth_twist_body)
-      {
-        const auto msg = m.instantiate<geometry_msgs::TwistStamped>();
-        if (msg)
-          pub_ground_truth_twist_body_.publish(msg);
-      }
-    }
+    // else if (config_.republish_ground_truth)
+    // {
+    //   if (topic == config_.topic_ground_truth_pose)
+    //   {
+    //     const auto msg = m.instantiate<geometry_msgs::PoseStamped>();
+    //     if (msg)
+    //       pub_ground_truth_pose_.publish(msg);
+    //   }
+    //   else if (topic == config_.topic_ground_truth_twist)
+    //   {
+    //     const auto msg = m.instantiate<geometry_msgs::TwistStamped>();
+    //     if (msg)
+    //       pub_ground_truth_twist_.publish(msg);
+    //   }
+    //   else if (topic == config_.topic_ground_truth_twist_body)
+    //   {
+    //     const auto msg = m.instantiate<geometry_msgs::TwistStamped>();
+    //     if (msg)
+    //       pub_ground_truth_twist_body_.publish(msg);
+    //   }
+    // }
 
     iterate();
     ros::spinOnce();
@@ -246,34 +255,36 @@ void EkfRioRos::iterate()
     }
 
     // collect angluar rate measurements during the radar scan
+    // 在雷达扫描期间收集角率测量值
+    // 
     if (!radar_w_queue_.empty() && (radar_w_queue_.back().time_stamp - radar_w_queue_.front().time_stamp).toSec() <
                                        config_.radar_frame_ms / 1.0e-3)
       radar_w_queue_.emplace_back(imu_data_);
   }
 
-  if (!queue_baro_.empty())
-  {
-    auto baro_msg = queue_baro_.front();
-    if (!baro_initialized_)
-    {
-      baro_init_vec_.emplace_back(baro_altimeter_.calculate_rel_neg_height(baro_msg));
-      queue_baro_.pop();
-    }
-    else if (ekf_rio_filter_.getTimestamp() >= baro_msg.header.stamp)
-    {
-      queue_baro_.pop();
-      if (config_.altimeter_update)
-      {
-        if (initialized_)
-        {
-          profiler_.start("baro_altimeter_update");
-          const auto h_rel = baro_altimeter_.calculate_rel_neg_height(baro_msg);
-          ekf_rio_filter_.updateAltimeter(h_rel, config_.sigma_altimeter);
-          profiler_.stop("baro_altimeter_update");
-        }
-      }
-    }
-  }
+  // if (!queue_baro_.empty())
+  // {
+  //   auto baro_msg = queue_baro_.front();
+  //   if (!baro_initialized_)
+  //   {
+  //     baro_init_vec_.emplace_back(baro_altimeter_.calculate_rel_neg_height(baro_msg));
+  //     queue_baro_.pop();
+  //   }
+  //   else if (ekf_rio_filter_.getTimestamp() >= baro_msg.header.stamp)
+  //   {
+  //     queue_baro_.pop();
+  //     if (config_.altimeter_update)
+  //     {
+  //       if (initialized_)
+  //       {
+  //         profiler_.start("baro_altimeter_update");
+  //         const auto h_rel = baro_altimeter_.calculate_rel_neg_height(baro_msg);
+  //         ekf_rio_filter_.updateAltimeter(h_rel, config_.sigma_altimeter);
+  //         profiler_.stop("baro_altimeter_update");
+  //       }
+  //     }
+  //   }
+  // }
 
   if (!queue_radar_trigger_.empty())
   {
@@ -454,12 +465,12 @@ void EkfRioRos::callbackIMU(const sensor_msgs::ImuConstPtr& imu_msg)
   mutex_.unlock();
 }
 
-void EkfRioRos::callbackBaroAltimter(const sensor_msgs::FluidPressureConstPtr& baro_msg)
-{
-  mutex_.lock();
-  queue_baro_.push(*baro_msg);
-  mutex_.unlock();
-}
+// void EkfRioRos::callbackBaroAltimter(const sensor_msgs::FluidPressureConstPtr& baro_msg)
+// {
+//   mutex_.lock();
+//   queue_baro_.push(*baro_msg);
+//   mutex_.unlock();
+// }
 
 void EkfRioRos::callbackRadarScan(const sensor_msgs::PointCloud2ConstPtr& radar_msg)
 {

@@ -1,0 +1,23 @@
+{
+    "files.associations": {
+        "*.m": "matlab",
+        "*.tcc": "cpp",
+        "unordered_map": "cpp",
+        "fstream": "cpp",
+        "istream": "cpp",
+        "numeric": "cpp",
+        "ostream": "cpp",
+        "sstream": "cpp",
+        "functional": "cpp"
+    },
+    "ros.distro": "noetic",
+    "python.autoComplete.extraPaths": [
+        "/share/1.catkin_ws/catkin_rio/devel/lib/python3/dist-packages",
+        "/opt/ros/noetic/lib/python3/dist-packages"
+    ],
+    "python.analysis.extraPaths": [
+        "/share/1.catkin_ws/catkin_rio/devel/lib/python3/dist-packages",
+        "/opt/ros/noetic/lib/python3/dist-packages"
+    ],
+    "cmake.configureOnOpen": false
+}

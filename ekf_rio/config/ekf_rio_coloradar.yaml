@@ -11,13 +11,13 @@ pose_path_publisher_rate: 5
 
 # Subscribers
 # topic_imu: "/sensor_platform/imu"
-topic_baro_altimeter: "/sensor_platform/baro"
+# topic_baro_altimeter: "/sensor_platform/baro"
 # topic_radar_scan: "/sensor_platform/radar/scan"
 # topic_radar_trigger: "/sensor_platform/radar/trigger"
 
 topic_imu: "/gx5/imu/data"
 topic_radar_scan: "/mmWaveDataHdl/RScan"
-topic_radar_trigger: "/mmWaveDataHdl/RScan/header"
+topic_radar_trigger: "/dca_node/heatmap/header"
 
 
 # Rosbag mode --> used by rosbag node
@@ -31,6 +31,7 @@ republish_ground_truth: False
 topic_ground_truth_pose: "/lidar_ground_truth/pose"
 topic_ground_truth_twist: "/lidar_ground_truth/twist"
 topic_ground_truth_twist_body: "/lidar_ground_truth/twist"
+use_coloradar_dataset: True
 
 # KF Updates
 altimeter_update: True

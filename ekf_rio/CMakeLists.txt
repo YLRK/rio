@@ -3,7 +3,7 @@ project(ekf_rio)
 
 find_package(catkin_simple REQUIRED)
 catkin_simple()
-
+SET(CMAKE_BUILD_TYPE Debug)
 add_compile_options(-std=c++14)
 
 SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -O0 -g")

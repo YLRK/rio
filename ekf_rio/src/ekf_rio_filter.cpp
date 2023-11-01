@@ -22,6 +22,7 @@
 
 using namespace rio;
 
+// EKF滤波器初始化，状态、姿态、偏置、协方差矩阵
 bool EkfRioFilter::init(const std::vector<ImuDataStamped>& imu_init_vec, const Real& baro_h0)
 {
   x_error_ = Vector::Zero(error_idx_.base_state_length);
@@ -64,6 +65,7 @@ bool EkfRioFilter::init(const std::vector<ImuDataStamped>& imu_init_vec, const R
   return true;
 }
 
+// 状态传播，更新状态估计和协方差矩阵
 bool EkfRioFilter::propagate(const ImuDataStamped& imu)
 {
   time_stamp_ = imu.time_stamp;
@@ -76,11 +78,13 @@ bool EkfRioFilter::propagate(const ImuDataStamped& imu)
   const Matrix G   = system_noise_.getG(nav_sol_.getC_n_b(), error_idx_, covariance_.rows());
 
   // TODO: consider more efficient implementation!!
+  // 更新协方差矩阵，通过状态传播矩阵Phi与系统噪声矩阵G
   covariance_ = Phi * covariance_ * Phi.transpose() + G * system_noise_.getQ(imu.dt) * G.transpose();
 
   return true;
 }
 
+// 计算状态传播矩阵，描述了如何根据先前的状态和输入数据来预测下一个状态
 Matrix EkfRioFilter::getPhi(Vector3 a_b_ib, const Real& T) const
 {
   Matrix F = Matrix::Zero(error_idx_.prob_noise_state_length, error_idx_.prob_noise_state_length);
@@ -95,6 +99,7 @@ Matrix EkfRioFilter::getPhi(Vector3 a_b_ib, const Real& T) const
   return Phi;
 }
 
+//EKF状态更新
 bool EkfRioFilter::kfUpdate(const Vector& r, const Matrix& H, const Vector& R_diag)
 {
   const Matrix R = R_diag.asDiagonal();
@@ -103,25 +108,29 @@ bool EkfRioFilter::kfUpdate(const Vector& r, const Matrix& H, const Vector& R_di
   Matrix S_inv = Matrix::Identity(S.rows(), S.cols());
   S.llt().solveInPlace(S_inv);
 
-  const Matrix K       = covariance_ * H.transpose() * S_inv;
-  const Vector x_error = K * r;
+  const Matrix K       = covariance_ * H.transpose() * S_inv; //卡尔曼增益
+  const Vector x_error = K * r; // 状态估计校准误差
 
-  covariance_ = covariance_ - K * H * covariance_;
-  correctNominalState(x_error);
+  covariance_ = covariance_ - K * H * covariance_; //更新协方差矩阵
+  correctNominalState(x_error); 
 
   return true;  // TODO add check for invalid result
 }
 
+//校正估计的状态以匹配测量结果
 bool EkfRioFilter::correctNominalState(const Vector x_error)
 {
+  //导航解状态校正
   nav_sol_.setPosition_n_b(nav_sol_.getPosition_n_b() - x_error.segment(error_idx_.position, 3));
   nav_sol_.v_n_b -= x_error.segment(error_idx_.velocity, 3);
   nav_sol_.setQuaternion(getCorrectedQuaternion(x_error.segment(error_idx_.attitude, 3), nav_sol_.getQuaternion_n_b()));
 
+  //陀螺仪加速度计偏置校正
   bias_.acc -= x_error.segment(error_idx_.bias_acc, 3);
   bias_.gyro -= x_error.segment(error_idx_.bias_gyro, 3);
   bias_.alt -= x_error(error_idx_.bias_alt);
 
+  //传感器到机体变换校正
   T_b_r_.translation() = T_b_r_.translation() - x_error.segment(error_idx_.l_b_r, 3);
   T_b_r_.linear()      = getCorrectedQuaternion(x_error.segment(error_idx_.eul_b_r, 3), Quaternion(T_b_r_.linear()))
                         .normalized()
@@ -147,6 +156,7 @@ bool EkfRioFilter::correctNominalState(const Vector x_error)
   return true;
 }
 
+// 添加雷达状态克隆
 bool EkfRioFilter::addRadarStateClone(const ros::Time& trigger_stamp)
 {
   if (covariance_.rows() > error_idx_.base_state_length)
@@ -177,6 +187,7 @@ bool EkfRioFilter::addRadarStateClone(const ros::Time& trigger_stamp)
   return true;
 }
 
+// 删除雷达状态的克隆
 bool EkfRioFilter::removeRadarStateClone()
 {
   if (covariance_.rows() > error_idx_.base_state_length)
@@ -200,6 +211,7 @@ bool EkfRioFilter::removeRadarStateClone()
   return false;
 }
 
+// 更新高度计的数据
 bool EkfRioFilter::updateAltimeter(const Real neg_rel_h, const Real& sigma)
 {
   Matrix H = Matrix::Zero(1, getCovarianceMatrix().cols());
@@ -217,24 +229,28 @@ bool EkfRioFilter::updateAltimeter(const Real neg_rel_h, const Real& sigma)
   return true;
 }
 
+// 更新雷达自身速度数据
 bool EkfRioFilter::updateRadarEgoVelocity(const Vector3 v_r,
                                           const Vector3 sigma_v_r,
                                           const Vector3 w,
                                           const Real outlier_rejection_thresh)
 {
-  Matrix H = Matrix::Zero(3, getCovarianceMatrix().cols());
-  Vector r(3);
-  Vector R_diag(3);
+  Matrix H = Matrix::Zero(3, getCovarianceMatrix().cols()); //构建雷达自身速度的观测模型
+  Vector r(3); //存储雷达自身速度的观测残差
+  Vector R_diag(3); //存储雷达自身速度的观测噪声方差
 
-  const Matrix C_n_b   = getRadarCloneState().nav_sol.getC_n_b();
+  // 获取克隆状态中的矩阵和矢量
+  const Matrix C_n_b   = getRadarCloneState().nav_sol.getC_n_b(); 
   const Matrix C_b_r   = getRadarCloneState().T_b_r.linear();
   const Vector3 l_b_br = getRadarCloneState().T_b_r.translation();
 
-  const Vector3 v_w   = math_helper::skewVec(w - getRadarCloneState().offset_gyro) * l_b_br;
-  const Vector3 v_n_b = getRadarCloneState().nav_sol.v_n_b;
-  const Vector3 v_b   = C_n_b.transpose() * v_n_b;
+  //计算雷达自身速度的各个分量
+  const Vector3 v_w   = math_helper::skewVec(w - getRadarCloneState().offset_gyro) * l_b_br; //计算雷达的速度在雷达坐标系下的投影
+  const Vector3 v_n_b = getRadarCloneState().nav_sol.v_n_b; //
+  const Vector3 v_b   = C_n_b.transpose() * v_n_b; //雷达坐标系中的速度
 
-  const Matrix3 H_v     = C_b_r.transpose() * C_n_b.transpose();
+  //计算观测模型的各个分量
+  const Matrix3 H_v     = C_b_r.transpose() * C_n_b.transpose(); //雷达自身速度与导航速度之间的关系
   const Matrix3 H_q     = C_b_r.transpose() * C_n_b.transpose() * math_helper::skewVec(v_n_b);
   const Matrix3 H_bg    = -C_b_r.transpose() * math_helper::skewVec(l_b_br);
   const Matrix3 H_l_b_r = C_b_r.transpose() * math_helper::skewVec(w);
@@ -246,17 +262,22 @@ bool EkfRioFilter::updateRadarEgoVelocity(const Vector3 v_r,
   H.block(0, getErrorIdx().sc_l_b_r, 3, 3)     = H_l_b_r;
   H.block(0, getErrorIdx().sc_eul_b_r, 3, 3)   = H_q_b_r;
 
+  //雷达自身速度的估计值
   const Vector3 v_r_filter = C_b_r.transpose() * (v_w + v_b);
 
-  r      = v_r_filter - v_r;
-  R_diag = (sigma_v_r).array().square();
+  r      = v_r_filter - v_r; //速度残差
+  R_diag = (sigma_v_r).array().square(); //观测噪声协方差
 
-  // outlier rejection
+  // outlier rejection 异常值排除
+  // 马哈拉诺比斯距离
   if (outlier_rejection_thresh > 0.001)
   {
+    // 计算马哈拉诺比斯距离，用于观测是否偏离了预测，以进行异常值检测
     const Real gamma =
         r.transpose() * (H * getCovarianceMatrix() * H.transpose() + Matrix(R_diag.asDiagonal())).inverse() * r;
     boost::math::chi_squared chiSquaredDist(3.0);
+
+    // 使用卡方分布计算阈值
     const double gamma_thresh = boost::math::quantile(chiSquaredDist, 1 - outlier_rejection_thresh);
 
     if (gamma < gamma_thresh)
