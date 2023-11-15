@@ -15,22 +15,22 @@ pose_path_publisher_rate: 5
 # topic_radar_scan: "/sensor_platform/radar/scan"
 # topic_radar_trigger: "/sensor_platform/radar/trigger"
 
-topic_imu: "/gx5/imu/data"
+# topic_imu: "/gx5/imu/data"
+topic_imu: "/os1_cloud_node/imu"
 topic_radar_scan: "/mmWaveDataHdl/RScan"
-topic_radar_trigger: "/dca_node/heatmap/header"
-
+# topic_radar_trigger: "/dca_node/heatmap/header"
 
 # Rosbag mode --> used by rosbag node
 # republish_ground_truth: True
 republish_ground_truth: False
 
-# topic_ground_truth_pose: "/ground_truth/pose"
-# topic_ground_truth_twist: "/ground_truth/twist"
-# topic_ground_truth_twist_body: "/ground_truth/twist_body"
+topic_ground_truth_pose: "/ground_truth/pose"
+topic_ground_truth_twist: "/ground_truth/twist"
+topic_ground_truth_twist_body: "/ground_truth/twist_body"
 
-topic_ground_truth_pose: "/lidar_ground_truth/pose"
-topic_ground_truth_twist: "/lidar_ground_truth/twist"
-topic_ground_truth_twist_body: "/lidar_ground_truth/twist"
+# topic_ground_truth_pose: "/lidar_ground_truth/pose"
+# topic_ground_truth_twist: "/lidar_ground_truth/twist"
+# topic_ground_truth_twist_body: "/lidar_ground_truth/twist"
 use_coloradar_dataset: True
 
 # KF Updates
@@ -45,11 +45,11 @@ use_w: True
 
 ## radar ego velocity estimation
 # filtering
-min_dist: 0.25                        # min distance of valid detection
-max_dist: 100                         # Max distance of valid detection
+min_dist: 0.125                        # min distance of valid detection
+max_dist: 16                          # Max distance of valid detection
 min_db: 3                             # min SNR in [db]
-elevation_thresh_deg: 60              # threshold for elevation [deg]
-azimuth_thresh_deg: 60                # threshold fo azimuth [deg]
+elevation_thresh_deg: 30              # threshold for elevation [deg]
+azimuth_thresh_deg: 40                # threshold fo azimuth [deg]
 radar_velocity_correction_factor: 1.0 # Doppler velocity correction
 filter_min_z: -3 # in -2 2 out
 filter_max_z: 3
@@ -88,7 +88,7 @@ model_noise_offset_deg: 2.0 # min model noise
 model_noise_scale_deg: 10.0 # scale model noise
 
 # Initialization
-T_init: 10
+T_init: 2
 calib_gyro: true
 g_n: 9.81
 
@@ -130,8 +130,13 @@ sigma_eul_b_r_yaw_deg: 0.25
 
 
 # Noise PSDs
-noise_psd_a: 0.03
-noise_psd_w_deg: 0.2
+# noise_psd_a: 0.03
+# noise_psd_w_deg: 0.2
+# noise_psd_b_a: 0.00001
+# noise_psd_b_w_deg: 0.00001
+# noise_psd_b_alt: 0.000001
+noise_psd_a: 1.0
+noise_psd_w_deg: 1.0
 noise_psd_b_a: 0.00001
 noise_psd_b_w_deg: 0.00001
 noise_psd_b_alt: 0.000001

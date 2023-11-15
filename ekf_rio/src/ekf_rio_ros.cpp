@@ -176,7 +176,7 @@ void EkfRioRos::runFromRosbag(const std::string& rosbag_path,
       if (config_.use_coloradar_dataset)
       {
         std_msgs::HeaderConstPtr radar_trigger_msg = boost::make_shared<std_msgs::Header>(radar_scan->header);
-        double timeOffset = 0.02; // 0.02秒
+        double timeOffset = 0.010; // 0.02秒
         const_cast<ros::Time&>(radar_trigger_msg->stamp) = radar_trigger_msg->stamp - ros::Duration(timeOffset);
         if (radar_trigger_msg != NULL)
           callbackRadarTrigger(radar_trigger_msg);

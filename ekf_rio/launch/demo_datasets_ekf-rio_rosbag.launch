@@ -7,8 +7,19 @@
     <param name="use_sim_time" value="False" type="bool"/>
     <arg name="enable_rviz" default="True"/>
 
-    <arg name="dataset_dir" default="$(find ekf_rio)../demo_datasets/ekf_rio/"/>
-    <arg name="rosbag" default="vicon_easy.bag"/>
+    <!-- <arg name="dataset_dir" default="$(find ekf_rio)../demo_datasets/ekf_rio/"/>
+    <arg name="rosbag" default="vicon_easy.bag"/> -->
+
+    <!-- <arg name="dataset_dir" default="/share/4.Dataset/rio/radar_inertial_datasets_icins_2021/carried_datasets/"/> -->
+    <!-- <arg name="rosbag" default="carried_1.bag"/> -->
+
+    <arg name="dataset_dir" default="/share/4.Dataset/rio/multi_radar_inertial_datasets_jgn_2022/"/>
+
+    <arg name="rosbag" default="basement.bag"/>
+
+    <!-- <arg name="dataset_dir" default="$(find ekf_rio)../demo_datasets/ekf_rio/"/>
+    <arg name="rosbag" default="ti_mmwave_rospkg_demo.bag"/> -->
+
 
     <arg name="config" default="ekf_rio_default"/>
     <arg name="calibration" default="$(find ekf_rio)../demo_datasets/ekf_rio/calib_vicon_dataset"/>
@@ -21,7 +32,8 @@
 
     <arg name="log_level" default="Info"/>
 
-    <node name="$(arg filter_node_name)" pkg="ekf_rio" type="rosbag_node" output="screen" launch-prefix="bash -c 'sleep 2; $0 $@' ">
+    <!-- launch-prefix="bash -c 'sleep 2; $0 $@' " -->
+    <node name="$(arg filter_node_name)" pkg="ekf_rio" type="rosbag_node" output="screen">
         <rosparam file="$(find ekf_rio)/config/$(arg config).yaml" command="load" ns=""/>
         <rosparam file="$(arg calibration).yaml" command="load" ns=""/>
         <param name="rosbag_path" value="$(arg dataset_dir)/$(arg rosbag)" type="string"/>
@@ -33,7 +45,7 @@
 
     </node>
 
-    <node name="evaluator" pkg="ekf_rio" type="pose_velocity_evaluator.py" output="screen">
+    <!-- <node name="evaluator" pkg="ekf_rio" type="pose_velocity_evaluator.py" output="screen">
         <rosparam file="$(arg calibration).yaml" command="load" ns=""/>
         <param name="topic_pose" value="$(arg filter_node_name)/pose" type="string"/>
         <param name="topic_twist" value="$(arg filter_node_name)/twist" type="string"/>
@@ -42,7 +54,7 @@
     </node>
 
     <node pkg="rosservice" type="rosservice" name="set_$(arg filter_node_name)_log_level"
-          args="call --wait /$(arg filter_node_name)/set_logger_level 'ros.$(arg filter_node_name)' '$(arg log_level)'"/>
+          args="call \-\-wait /$(arg filter_node_name)/set_logger_level 'ros.$(arg filter_node_name)' '$(arg log_level)'"/> -->
 
     <node pkg="rviz" type="rviz" name="rviz" args="-d $(find ekf_rio)/config/ekf_rio.rviz" if="$(arg enable_rviz)"/>
 

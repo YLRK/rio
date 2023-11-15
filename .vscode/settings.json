@@ -8,7 +8,11 @@
         "numeric": "cpp",
         "ostream": "cpp",
         "sstream": "cpp",
-        "functional": "cpp"
+        "functional": "cpp",
+        "array": "cpp",
+        "deque": "cpp",
+        "vector": "cpp",
+        "string_view": "cpp"
     },
     "ros.distro": "noetic",
     "python.autoComplete.extraPaths": [

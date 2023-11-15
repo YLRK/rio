@@ -31,6 +31,20 @@
                 // "rosbag_node"
             ],
             "type": "ros"
+        },
+        {
+            "name": "demo_ekf-rio_rosbag.launch",
+            "request": "launch",
+            "target": "/share/1.catkin_ws/catkin_rio/src/radrio/ekf_rio/launch/demo_datasets_ekf-rio_rosbag.launch",
+            "launch": [
+                "rviz",
+                "gz",
+                "gzclient",
+                "gzserver",
+                "ekf_rio",
+                // "rosbag_node"
+            ],
+            "type": "ros"
         }
     ]
 }

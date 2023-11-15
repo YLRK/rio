@@ -1,37 +1,67 @@
 ## Topics
+#timmware
 # topic_baro_altimeter: "/sensor_platform/baro"
 # topic_imu: "/sensor_platform/imu"
 # topic_radar_scan: "/ti_mmwave/radar_scan_pcl"
 # topic_radar_trigger: "/sensor_platform/radar_right/trigger"
 
 topic_imu: "/gx5/imu/data"
+# topic_imu: "/os1_cloud_node/imu"
 topic_radar_scan: "/mmWaveDataHdl/RScan"
-# topic_radar_trigger: "/mmWaveDataHdl/RScan/header"
-topic_radar_trigger: "/dca_node/heatmap/header"
+# topic_radar_trigger: "/dca_node/heatmap/header"
 
+# coloradar
+# l_b_r_x: -0.14505645
+# l_b_r_y: 0.08988504
+# l_b_r_z: -0.02508597
 
+# q_b_r_x: 0.00039632676732530465469
+# q_b_r_y: 0.9999998775577558785
+# q_b_r_z: 0.0
+# q_b_r_w: 0.0002963267668540364567
 
-
-## Extrinsic calibration of body frame to radar frame
-# translation of radar frame expressed in body frame
-# l_b_r_x: 0.03
-# l_b_r_y: 0.03
-# l_b_r_z: -0.06
-l_b_r_x: -0.145
-l_b_r_y: 0.09
-l_b_r_z: -0.025
-
+# new radar_to_gx5_imu
+# l_b_r_x: 0.09000053
+# l_b_r_y: -0.14501446
+# l_b_r_z: 0.02491406
 
 # rotation radar frame to body frame
-# q_b_r_x: 0.923218461092
-# q_b_r_y: 0.375992995522
-# q_b_r_z: -0.0267831268675
-# q_b_r_w: -0.0746967504749
-q_b_r_x: 0.0
-q_b_r_y: 0.0
-q_b_r_z: 0.706825181105
-q_b_r_w: 0.707388269167
+q_b_r_x: 0.99999987609522023035
+q_b_r_y: 0.00039999997180195369069
+q_b_r_z: 1.1853071319207357054e-07
+q_b_r_w: -0.00029632676685403634828
 
+# new gx5_imu_to_radar
+l_b_r_x: -0.0898845
+l_b_r_y: -0.14507162
+l_b_r_z: 0.025
+
+# # rotation radar frame to body frame
+# q_b_r_x: 0.99999987609522023035
+# q_b_r_y: 0.00039999997180195369069
+# q_b_r_z: 1.1853071319207357054e-07
+# q_b_r_w: 0.00029632676685403640249
+
+
+# radar_to_lidar_imu
+# l_b_r_x: -0.10705352
+# l_b_r_y: -0.07442811
+# l_b_r_z: -0.06118
+
+# q_b_r_x: 0.0
+# q_b_r_y: 0.0
+# q_b_r_z: 0.99980000666656887454
+# q_b_r_w: -0.019998666693777401859
+
+# lidar_imu_to_radar
+# l_b_r_x: -0.10994422
+# l_b_r_y: -0.07008757
+# l_b_r_z: 0.06118
+
+# q_b_r_x: 0.0
+# q_b_r_y: 0.0
+# q_b_r_z: 0.99980000666656887454
+# q_b_r_w: 0.019998666693777401859
 
 # length of each radar frame (="exposure time" of radar scan) in milliseconds
 radar_frame_ms: 18.5

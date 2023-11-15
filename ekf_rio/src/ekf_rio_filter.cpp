@@ -273,13 +273,18 @@ bool EkfRioFilter::updateRadarEgoVelocity(const Vector3 v_r,
   if (outlier_rejection_thresh > 0.001)
   {
     // 计算马哈拉诺比斯距离，用于观测是否偏离了预测，以进行异常值检测
+    
     const Real gamma =
         r.transpose() * (H * getCovarianceMatrix() * H.transpose() + Matrix(R_diag.asDiagonal())).inverse() * r;
     boost::math::chi_squared chiSquaredDist(3.0);
+    // std::cout << "r" <<r.transpose() << std::endl;
+    // std::cout << "2:"<<(H * getCovarianceMatrix() * H.transpose() + Matrix(R_diag.asDiagonal())).inverse() << std::endl;
+    // std::cout << "H:" << H * getCovarianceMatrix() * H.transpose() << std::endl;
+    // std::cout <<  "3:" <<(H * getCovarianceMatrix() * H.transpose() + Matrix(R_diag.asDiagonal())).inverse() * r << "\n" << std::endl;
 
     // 使用卡方分布计算阈值
     const double gamma_thresh = boost::math::quantile(chiSquaredDist, 1 - outlier_rejection_thresh);
-
+    
     if (gamma < gamma_thresh)
     {
       kfUpdate(r, H, R_diag);

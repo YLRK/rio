@@ -19,7 +19,7 @@
     <!-- <arg name="dataset_dir" default="$(find radar_ego_velocity_estimator)/../demo_datasets/"/>
     <arg name="rosbag" default="demo_ti_mmwave_rospkg_format.bag"/> -->
     <arg name="dataset_dir" default="/share/4.Dataset/coloRadar/rosbag/"/>
-    <arg name="rosbag" default="outdoors_run0.bag"/>
+    <arg name="rosbag" default="edgar_classroom_run0.bag"/>
 
     <arg name="bag_start" default="0."/>
     <arg name="bag_duration" default="-1"/>

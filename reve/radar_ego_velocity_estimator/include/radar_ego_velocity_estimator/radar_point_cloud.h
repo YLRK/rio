@@ -1,3 +1,10 @@
+/*
+ * @Descripttion: 
+ * @version: 1.0
+ * @Author: YLDS
+ * @Date: 2023-10-31 14:16:39
+ * @LastEditTime: 2023-11-02 13:37:10
+ */
 // This file is part of REVE - Radar Ego Velocity Estimator
 // Copyright (C) 2021  Christopher Doer <christopher.doer@kit.edu>
 
@@ -62,6 +69,25 @@ struct coloradarCloudType
       float doppler;
     };
     float data_c[5];
+  };
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+};
+
+
+struct huginradarCloudType
+{
+  PCL_ADD_POINT4D;
+  union
+  {
+    struct
+    {
+      float range;
+      float elevation;
+      float azimuth;
+      float power;
+      float doppler;
+    };
+    float data_c[7];
   };
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };

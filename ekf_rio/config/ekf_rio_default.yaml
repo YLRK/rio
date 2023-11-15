@@ -10,10 +10,12 @@ publisher_rate: 30
 pose_path_publisher_rate: 5
 
 # Subscribers
-topic_imu: "/sensor_platform/imu"
-topic_baro_altimeter: "/sensor_platform/baro"
-topic_radar_scan: "/sensor_platform/radar/scan"
-topic_radar_trigger: "/sensor_platform/radar/trigger"
+# topic_imu: "/sensor_platform/imu"
+# topic_baro_altimeter: "/sensor_platform/baro"
+# topic_radar_scan: "/sensor_platform/radar/scan"
+# topic_radar_trigger: "/sensor_platform/radar/trigger"
+
+use_coloradar_dataset: False
 
 # Rosbag mode --> used by rosbag node
 republish_ground_truth: True
