@@ -16,6 +16,9 @@
 
 #include <math.h>
 #include <numeric>
+#include <filesystem>
+#include <iostream>
+#include <iomanip> // 引入用于控制输出格式的库
 
 #include <geometry_msgs/TransformStamped.h>
 #include <rosbag/bag.h>
@@ -34,7 +37,7 @@
 #include <ekf_rio/ekf_rio_ros.h>
 
 using namespace rio;
-
+namespace fs = std::filesystem;
 EkfRioRos::EkfRioRos(ros::NodeHandle& nh) : initialized_{false}
 {
   reconfigure_server_.setCallback(boost::bind(&EkfRioRos::reconfigureCallback, this, _1, _2));
@@ -128,6 +131,24 @@ void EkfRioRos::runFromRosbag(const std::string& rosbag_path,
   // topics.push_back(config_.topic_baro_altimeter);
   topics.push_back(config_.topic_radar_scan);
   topics.push_back(config_.topic_radar_trigger);
+  
+  if (config_.save_pose_path_as_kitti)
+  {
+    rosbag_filename_ = fs::path(rosbag_path).stem().string();
+
+    config_.kitti_file_path = config_.kitti_file_path + "/" + rosbag_filename_;
+    // 创建文件夹
+    if (!fs::exists(config_.kitti_file_path)) {
+      if (!fs::create_directories(config_.kitti_file_path)) {
+          std::cerr << "无法创建文件夹: " << config_.kitti_file_path << std::endl;
+          return;
+      }
+    }
+    kitti_file = config_.kitti_file_path + "/" + rosbag_filename_ + ".txt";
+    timestamps_file = config_.kitti_file_path + "/" + "timestamps.txt";
+    std::ofstream file(kitti_file);
+    std::ofstream timestamps(timestamps_file);
+  }
 
   if (config_.republish_ground_truth)
   {
@@ -176,13 +197,17 @@ void EkfRioRos::runFromRosbag(const std::string& rosbag_path,
       if (config_.use_coloradar_dataset)
       {
         std_msgs::HeaderConstPtr radar_trigger_msg = boost::make_shared<std_msgs::Header>(radar_scan->header);
-        double timeOffset = 0.010; // 0.02秒
+        double timeOffset = 0.0; // 0.02秒
         const_cast<ros::Time&>(radar_trigger_msg->stamp) = radar_trigger_msg->stamp - ros::Duration(timeOffset);
         if (radar_trigger_msg != NULL)
           callbackRadarTrigger(radar_trigger_msg);
       }
       if (sleep_ms > 0)
         ros::Duration(sleep_ms / 1.0e3).sleep();
+      if (config_.save_pose_path_as_kitti)
+      {
+        savePosePathAsKitti(pose_path_, kitti_file, timestamps_file);
+      }
     }
     else if (topic == config_.topic_radar_trigger)
     {
@@ -606,4 +631,60 @@ void EkfRioRos::printStats()
 
   printf("  Attitude Error: %0.2fdeg\n\n", config_.yaw_0_deg - att_final.z());
   // clang-format on
+}
+
+
+void EkfRioRos::savePosePathAsKitti(const nav_msgs::Path& pose_path, const std::string& file_path, const std::string& timestamps_file) {
+
+  if (pose_path.poses.empty()) {
+    std::cerr << "poses数组为空，没有数据可写入" << std::endl;
+    return;
+  }
+
+  std::ofstream file(file_path, std::ios::app);
+  if (!file.is_open()) {
+    std::cerr << "无法打开文件写入" << std::endl;
+    return;
+  }
+
+  std::ofstream timestamps(timestamps_file, std::ios::app);
+  if (!timestamps.is_open()) {
+    std::cerr << "无法打开时间戳文件写入" << std::endl;
+    return;
+  }
+
+  // 只处理poses数组中的最后一个元素
+  const auto& pose_stamped = pose_path.poses.back();
+
+  // 提取平移向量
+  const auto& p = pose_stamped.pose.position;
+  // 将四元数转换为旋转矩阵
+  tf::Quaternion q;
+  tf::quaternionMsgToTF(pose_stamped.pose.orientation, q);
+  tf::Matrix3x3 m(q);
+  // 写入KITTI格式
+  file << m[0][0] << " " << m[0][1] << " " << m[0][2] << " " << p.x << " "
+       << m[1][0] << " " << m[1][1] << " " << m[1][2] << " " << p.y << " "
+       << m[2][0] << " " << m[2][1] << " " << m[2][2] << " " << p.z << std::endl;
+
+  file.close();
+
+  // 写入时间戳
+  timestamps << std::fixed << std::setprecision(6) << pose_stamped.header.stamp.toSec() << std::endl;
+  timestamps.close();
+
+  // for (const auto& pose_stamped : pose_path.poses) {
+  //   // 提取平移向量
+  //   const auto& p = pose_stamped.pose.position;
+  //   // 将四元数转换为旋转矩阵
+  //   tf::Quaternion q;
+  //   tf::quaternionMsgToTF(pose_stamped.pose.orientation, q);
+  //   tf::Matrix3x3 m(q);
+  //   // 写入KITTI格式
+  //   file << m[0][0] << " " << m[0][1] << " " << m[0][2] << " " << p.x << " "
+  //        << m[1][0] << " " << m[1][1] << " " << m[1][2] << " " << p.y << " "
+  //        << m[2][0] << " " << m[2][1] << " " << m[2][2] << " " << p.z << std::endl;
+  // }
+
+  // file.close();
 }

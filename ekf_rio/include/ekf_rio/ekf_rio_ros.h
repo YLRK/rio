@@ -119,6 +119,11 @@ private:
    */
   void printStats();
 
+  /**
+   * @brief Saves the pose path as a kitti file
+   */
+  void savePosePathAsKitti(const nav_msgs::Path& pose_path, const std::string& file_path, const std::string& timestamps_file);
+
   const std::string kStreamingPrefix = "[EkfRioRos]: ";
 
   dynamic_reconfigure::Server<ekf_rio::EkfRioConfig> reconfigure_server_;
@@ -177,5 +182,11 @@ private:
   std::string radar_frame_id_ = "";
 
   nav_msgs::Path pose_path_;
+
+  std::string rosbag_path_;
+  std::string rosbag_filename_;
+  std::string kitti_file;
+  std::string timestamps_file;
+  
 };
 }  // namespace rio

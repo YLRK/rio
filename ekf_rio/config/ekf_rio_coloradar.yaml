@@ -32,6 +32,9 @@ topic_ground_truth_twist_body: "/ground_truth/twist_body"
 # topic_ground_truth_twist: "/lidar_ground_truth/twist"
 # topic_ground_truth_twist_body: "/lidar_ground_truth/twist"
 use_coloradar_dataset: True
+save_pose_path_as_kitti: True
+kitti_file_path: "/share/1.catkin_ws/catkin_rio/src/radrio/output/coloradar"
+
 
 # KF Updates
 altimeter_update: True
@@ -88,7 +91,7 @@ model_noise_offset_deg: 2.0 # min model noise
 model_noise_scale_deg: 10.0 # scale model noise
 
 # Initialization
-T_init: 2
+T_init: 3
 calib_gyro: true
 g_n: 9.81
 
@@ -135,8 +138,8 @@ sigma_eul_b_r_yaw_deg: 0.25
 # noise_psd_b_a: 0.00001
 # noise_psd_b_w_deg: 0.00001
 # noise_psd_b_alt: 0.000001
-noise_psd_a: 1.0
-noise_psd_w_deg: 1.0
+noise_psd_a: 0.7
+noise_psd_w_deg: 0.6
 noise_psd_b_a: 0.00001
 noise_psd_b_w_deg: 0.00001
 noise_psd_b_alt: 0.000001
